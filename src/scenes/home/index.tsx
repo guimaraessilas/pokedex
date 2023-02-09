@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { api } from '../../api/api';
 
-import Card, { Pokemon } from '../../components/Card';
+import Card from '../../components/Card';
+import { Pokemon } from '../../types/Pokemon';
 
 export default function Home() {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);

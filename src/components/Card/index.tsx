@@ -1,20 +1,7 @@
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
+import { Pokemon } from '../../types/Pokemon';
 import { colors } from '../../utils/colors';
-
-export type PokemonTypes = {
-  type: {
-    name: string;
-  };
-};
-
-export type Pokemon = {
-  name: string;
-  url: string;
-  id: string;
-  number?: string;
-  types: PokemonTypes[];
-};
 
 const Card = ({ name, types, id, url }: Pokemon) => {
   return (
