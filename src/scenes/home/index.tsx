@@ -1,24 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { api } from '../../api/api';
 
 import Card from '../../components/Card';
 import { Pokemon } from '../../types/Pokemon';
+import Loading from '../../components/Loading';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Home() {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [offset, setOffset] = useState(0);
   const limit = 20;
+  const [loading, setLoading] = useState(false);
 
   const fetchData = async () => {
+    setLoading(true);
     const { results } = await api.getAll(offset, limit);
     const payloadPokemons: Pokemon[] = await Promise.all(
       results.map(async (pokemon: Pokemon) => {
-        const { id, types } = await api.getDetails(pokemon.url);
-        return { name: pokemon.name, id, types };
+        const { id, types, abilities, species } = await api.getDetails(
+          pokemon.url
+        );
+        return { name: pokemon.name, id, types, abilities, species };
       })
     );
     setPokemons(pokemons.concat(payloadPokemons));
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -29,40 +36,27 @@ export default function Home() {
     setOffset(offset + limit);
   };
 
+  if (loading && pokemons.length === 0) {
+    return <Loading />;
+  }
+
+  const navigation = useNavigation();
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Pokedex</Text>
       </View>
-      {/* <View style={styles.searchContainer}>
-        <TextInput
-          onChangeText={(text) => setSearch(text)}
-          style={styles.searchInput}
-          placeholder="Pesquisar..."
-        />
-        <TouchableOpacity
-          onPress={() => searchPokemon()}
-          style={{
-            borderColor: '#606060',
-            borderWidth: 1,
-            height: 30,
-            justifyContent: 'center',
-            backgroundColor: 'white',
-            borderRadius: 5,
-          }}
-        >
-          <Text style={{ margin: 4 }}>Pesquisar</Text>
-        </TouchableOpacity>
-      </View> */}
       <FlatList
         data={pokemons}
         numColumns={2}
         renderItem={({ item }) => (
           <Card
+            key={item.id}
             id={item.id}
             name={item.name}
             types={item.types}
-            url={item.url}
+            onPress={() => navigation.navigate('Detail', item)}
           />
         )}
         onEndReached={loadMoreData}
