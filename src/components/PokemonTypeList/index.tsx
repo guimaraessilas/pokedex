@@ -1,22 +1,22 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { PokemonTypes } from '../../types/Pokemon';
-import { colors } from '../../utils/colors';
+import { colors } from '../../constants/colors';
 
 type PokemonTypeProps = {
-  types: PokemonTypes[];
+  types?: PokemonTypes[];
   horizontal?: boolean;
 };
 
 const PokemonTypeList = ({ types, horizontal }: PokemonTypeProps) => {
   return (
     <View style={[styles.container, horizontal && { flexDirection: 'row' }]}>
-      {types?.map(({ type }) => (
+      {types?.map(({ type }, index) => (
         <View
-          key={type.name}
+          key={`${type.name}-${index}`}
           style={[
             styles.textContainer,
-            { backgroundColor: `${colors[type?.name]}` },
+            { backgroundColor: `${colors[type?.name || 0]}` },
           ]}
         >
           <Text style={styles.typeTitle}>{type.name}</Text>
@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
     fontWeight: '700',
+    textTransform: 'capitalize',
   },
   container: {
     alignSelf: 'flex-start',

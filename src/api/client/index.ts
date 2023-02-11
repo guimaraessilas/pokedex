@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import errorHandler from './errorHandler';
 
-const baseURL = process.env.REACT_APP_BASE_URL;
+export const baseURL = process.env.REACT_APP_BASE_URL;
 
 const instance = axios.create({
   baseURL,
@@ -10,7 +10,6 @@ const instance = axios.create({
 
 const client = (options: AxiosRequestConfig<any>, handleError = true) => {
   const onSuccess = (response: { data: any }) => response.data;
-
   const onError = (error: any) => errorHandler(error, handleError);
   return instance(options).then(onSuccess).catch(onError);
 };

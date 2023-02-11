@@ -5,11 +5,8 @@ const errorHandler = (error: any, handleError: any) => {
     return Promise.reject(error);
   }
 
-  if (error && error.message) {
-    // console.log(
-    //   'Houve um erro de comunicação com o servidor',
-    //   'Verifique sua conexão e tente novamente mais tarde.'
-    // );
+  if (error.message) {
+    Alert.alert(error.message);
   }
   return Promise.reject(error);
 };

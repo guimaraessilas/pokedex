@@ -1,25 +1,36 @@
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Pokemon } from '../../types/Pokemon';
-import { colors } from '../../utils/colors';
 import PokemonTypeList from '../PokemonTypeList';
+import { getColor } from '../../utils/getColors';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 class Card extends React.PureComponent {
   render() {
-    const { name, types, id, onPress, sprites } = this.props as Pokemon & {
+    const { name, types, onPress, sprites, captured } = this
+      .props as Pokemon & {
       onPress: () => void;
-    };
+    } & { captured: boolean };
 
     return (
       <TouchableOpacity
         onPress={onPress}
-        style={[
-          styles.container,
-          { backgroundColor: `${colors[types[0].type.name]}cc` },
-        ]}
+        style={[styles.container, { backgroundColor: `${getColor(types)}cc` }]}
       >
-        <Text style={styles.title}>{name}</Text>
-        <View style={{ flexDirection: 'row', width: '100%' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-evenly',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          <Text style={styles.title}>{name}</Text>
+          {captured && (
+            <MaterialCommunityIcons size={16} color="white" name="pokeball" />
+          )}
+        </View>
+        <View style={{ flexDirection: 'row', width: '100%', marginLeft: 12 }}>
           <PokemonTypeList types={types} />
           <Image
             source={{
@@ -48,12 +59,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingLeft: 12,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     textTransform: 'capitalize',
-    alignSelf: 'flex-start',
     color: 'white',
     fontWeight: '700',
     marginBottom: 8,

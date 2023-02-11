@@ -5,4 +5,5 @@ export type PokemonState = {
   list: Pokemon[];
   error: any;
   success: boolean;
+  selected?: Pokemon | null;
 };

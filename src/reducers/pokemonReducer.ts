@@ -1,5 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { AsyncStorage } from 'react-native';
 import { api } from '../api/api';
+import { baseURL } from '../api/client';
 import { Pokemon } from '../types/Pokemon';
 import { PokemonState } from '../types/PokemonState';
 
@@ -18,10 +20,55 @@ export const pokemonsActions = {
       return payloadPokemons;
     }
   ),
-  getDetails: createAsyncThunk('pokemon/getDetails', async (url: string) => {
-    const response = await api.getDetails(url);
-    return response;
-  }),
+  searchByName: createAsyncThunk(
+    'pokemon/searchByName',
+    async (search: string) => {
+      const data = await api.getDetails(`${baseURL}pokemon/${search}`);
+      const { name, id, types, abilities, species, sprites }: Pokemon =
+        await api.getDetails(`${baseURL}pokemon/${data.id}`);
+
+      const { flavor_text_entries, egg_groups, habitat } = await api.getDetails(
+        species.url
+      );
+
+      const selected = {
+        name,
+        id,
+        types,
+        abilities,
+        species,
+        sprites,
+        flavor_text_entries,
+        egg_groups,
+        habitat,
+      } as Pokemon;
+
+      return selected;
+    }
+  ),
+  searchById: createAsyncThunk(
+    'pokemon/searchById',
+    async (pokemonId: number) => {
+      const { name, id, types, abilities, species, sprites }: Pokemon =
+        await api.getDetails(`${baseURL}pokemon/${pokemonId}`);
+      const { flavor_text_entries, egg_groups, habitat } = await api.getDetails(
+        species.url
+      );
+      const selected = {
+        name,
+        id,
+        types,
+        abilities,
+        species,
+        flavor_text_entries,
+        sprites,
+        egg_groups,
+        habitat,
+      } as Pokemon;
+
+      return selected;
+    }
+  ),
 };
 
 const initialState = {
@@ -36,6 +83,52 @@ const pokemonSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
+    builder.addCase(pokemonsActions.searchByName.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(
+      pokemonsActions.searchByName.fulfilled,
+      (state, { payload }) => {
+        state.loading = false;
+        state.error = null;
+        state.success = true;
+        state.selected = payload;
+      }
+    );
+    builder.addCase(
+      pokemonsActions.searchByName.rejected,
+      (state, { payload }) => {
+        state.loading = false;
+        state.error = payload;
+        state.success = false;
+        state.selected = null;
+      }
+    );
+
+    builder.addCase(pokemonsActions.searchById.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(
+      pokemonsActions.searchById.fulfilled,
+      (state, { payload }) => {
+        state.loading = false;
+        state.error = null;
+        state.success = true;
+        state.selected = payload;
+      }
+    );
+    builder.addCase(
+      pokemonsActions.searchById.rejected,
+      (state, { payload }) => {
+        state.loading = false;
+        state.error = payload;
+        state.success = false;
+        state.selected = null;
+      }
+    );
+
     builder.addCase(pokemonsActions.getAll.pending, (state) => {
       state.loading = true;
       state.error = null;

@@ -1,107 +1,158 @@
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  AsyncStorage,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import PokemonTypeList from '../../components/PokemonTypeList';
-import { Pokemon } from '../../types/Pokemon';
 import Constants from 'expo-constants';
-import { colors } from '../../utils/colors';
-import { api } from '../../api/api';
-import { PokemonDetails } from '../../types/PokemonDetails';
+import { colors } from '../../constants/colors';
 import Loading from '../../components/Loading';
+import { useSelector } from 'react-redux';
+import {
+  pokemonsActions,
+  pokemonsSelector,
+} from '../../reducers/pokemonReducer';
+import { getColor } from '../../utils/getColors';
+import { loadStoragedPokemons } from '../../utils/loadStoragedPokemons';
+import { keys } from '../../constants/keys';
 
-const Detail = ({
-  route,
-  navigation,
-}: {
-  route: { params: Pokemon };
-  navigation: { goBack: () => void };
-}) => {
-  const { name, types, id, abilities, species, sprites }: Pokemon =
-    route.params;
+const Detail = ({ navigation }: { navigation: { goBack: () => void } }) => {
+  const { selected, loading } = useSelector(pokemonsSelector);
+  const [captured, setCaptured] = useState(false);
+  const [textButton, setTextButton] = useState('Trow Pokeball');
+  const [storagedPokemons, setStoragedPokemons] = useState<number[]>([]);
 
-  const [pokemonDetails, setPokemonDetails] = useState<PokemonDetails>();
-  const [loading, setLoading] = useState(true);
-
-  const fetchData = async () => {
-    const data = await api.getDetails(species.url);
-    setPokemonDetails(data);
-    setLoading(false);
+  const catchPokemon = async (id: number) => {
+    try {
+      const gotcha = Math.random() >= 0.5;
+      if (gotcha) {
+        const newPokemonList = [...storagedPokemons, id];
+        setStoragedPokemons(newPokemonList);
+        await AsyncStorage.setItem(
+          keys.BILL_PC,
+          JSON.stringify(newPokemonList)
+        );
+      } else {
+        setTextButton('Wanna try again?');
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
-    fetchData();
+    loadStoragedPokemons(setStoragedPokemons);
   }, []);
+
+  useEffect(() => {
+    if (selected) {
+      setCaptured(storagedPokemons.includes(selected.id));
+    }
+  }, [storagedPokemons]);
+
+  useEffect(() => {
+    if (captured) {
+      setTextButton('Gotcha!');
+    }
+  }, [captured]);
 
   if (loading) {
     return <Loading />;
-  }
+  } else if (!!selected) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: `${getColor(selected?.types)}99` },
+        ]}
+      >
+        <View style={styles.header}>
+          <MaterialCommunityIcons
+            onPress={() => navigation.goBack()}
+            name="arrow-left"
+            size={24}
+            color="white"
+          />
+          {captured && (
+            <MaterialCommunityIcons
+              onPress={() => navigation.goBack()}
+              name="pokeball"
+              size={24}
+              color="white"
+            />
+          )}
+        </View>
 
-  return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: `${colors[types[0].type.name]}99` },
-      ]}
-    >
-      <View style={styles.header}>
-        <MaterialCommunityIcons
-          onPress={() => navigation.goBack()}
-          name="arrow-left"
-          size={24}
-          color="white"
+        <View style={styles.pokemonIdentification}>
+          <View style={styles.nameContainer}>
+            <Text style={styles.name}>{selected?.name}</Text>
+            <PokemonTypeList horizontal types={selected?.types} />
+          </View>
+          <View>
+            <Text style={styles.pokedexNumber}>
+              #{String(selected?.id).padStart(4, '0')}
+            </Text>
+          </View>
+        </View>
+        <Image
+          source={{
+            uri: selected?.sprites.front_default,
+          }}
+          style={styles.picture}
         />
-      </View>
-
-      <View style={styles.pokemonIdentification}>
-        <View style={styles.nameContainer}>
-          <Text style={styles.name}>{name}</Text>
-          <PokemonTypeList horizontal types={types} />
-        </View>
-        <View>
-          <Text style={styles.pokedexNumber}>
-            #{String(id).padStart(4, '0')}
-          </Text>
-        </View>
-      </View>
-      <Image
-        source={{
-          uri: sprites.front_default,
-        }}
-        style={styles.picture}
-      />
-      <View style={styles.status}>
-        <View style={styles.textContainer}>
-          <Text style={styles.flavorText}>
-            {pokemonDetails?.flavor_text_entries[0].flavor_text}
-          </Text>
-        </View>
-        <View style={styles.textContainer}>
-          <View style={styles.listContainer}>
-            <Text style={styles.listText}>Abilities: </Text>
-            {abilities.map(({ ability }, index) => (
-              <Text key={ability.name} style={styles.listText}>
-                {` ${ability.name}`}
-                {index !== abilities.length - 1 && ','}
-              </Text>
-            ))}
+        <View style={styles.status}>
+          <View style={styles.textContainer}>
+            <Text style={styles.flavorText}>
+              {selected?.flavor_text_entries[0].flavor_text}
+            </Text>
           </View>
-          <View style={styles.listContainer}>
-            <Text style={styles.listText}>Species: </Text>
-            {pokemonDetails?.egg_groups.map((specie, index) => (
-              <Text key={specie.name} style={styles.listText}>
-                {` ${specie.name}`}
-                {index !== pokemonDetails.egg_groups.length - 1 && ','}
-              </Text>
-            ))}
-          </View>
-          <View style={styles.listContainer}>
-            <Text style={styles.listText}>Habitat: </Text>
-            <Text style={styles.listText}>{pokemonDetails?.habitat.name}</Text>
+          <View style={styles.textContainer}>
+            <View style={styles.listContainer}>
+              <Text style={styles.listText}>Abilities: </Text>
+              {selected?.abilities.map(({ ability }, index) => (
+                <Text key={ability.name} style={styles.listText}>
+                  {` ${ability.name}`}
+                  {index !== selected.abilities.length - 1 && ','}
+                </Text>
+              ))}
+            </View>
+            <View style={styles.listContainer}>
+              <Text style={styles.listText}>Species: </Text>
+              {selected?.egg_groups.map((specie, index) => (
+                <Text key={specie.name} style={styles.listText}>
+                  {` ${specie.name}`}
+                  {index !== selected.egg_groups.length - 1 && ','}
+                </Text>
+              ))}
+            </View>
+            <View style={styles.listContainer}>
+              <Text style={styles.listText}>Habitat: </Text>
+              <Text style={styles.listText}>{selected?.habitat.name}</Text>
+            </View>
+            <TouchableOpacity
+              style={{
+                width: '100%',
+                height: 40,
+                backgroundColor: getColor(selected.types),
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: 20,
+              }}
+              disabled={captured}
+              onPress={() => catchPokemon(selected.id)}
+            >
+              <Text style={{ color: 'white', fontSize: 20 }}>{textButton}</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
-    </View>
-  );
+    );
+  }
 };
 
 export default Detail;
@@ -116,14 +167,14 @@ const styles = StyleSheet.create({
   },
   header: {
     marginTop: Constants.statusBarHeight + 8,
-    height: 40,
+    height: 30,
     justifyContent: 'space-between',
     flexDirection: 'row',
     paddingHorizontal: 20,
   },
   nameContainer: {
     justifyContent: 'space-evenly',
-    height: 70,
+    height: 75,
   },
   name: {
     fontSize: 32,
@@ -146,7 +197,7 @@ const styles = StyleSheet.create({
     height: 250,
     width: 200,
     alignSelf: 'center',
-    marginBottom: -70,
+    marginBottom: -80,
     zIndex: 1,
   },
   status: {
