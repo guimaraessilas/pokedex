@@ -12,12 +12,15 @@ export type Ability = {
 
 export type Pokemon = {
   name: string;
-  url?: string;
+  url: string;
+  sprites: {
+    front_default: string;
+  };
   id: string;
   number?: string;
   types: PokemonTypes[];
-  abilities?: Ability[];
-  species?: {
+  abilities: Ability[];
+  species: {
     url: string;
   };
 };

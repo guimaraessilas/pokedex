@@ -5,7 +5,7 @@ export type PokemonDetails = {
   habitat: {
     name: string;
   };
-  is_baby: boolean;
-  is_legendary: boolean;
-  is_mythical: boolean;
+  flavor_text_entries: {
+    flavor_text: string;
+  }[];
 };

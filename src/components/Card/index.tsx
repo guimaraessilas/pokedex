@@ -6,7 +6,7 @@ import PokemonTypeList from '../PokemonTypeList';
 
 class Card extends React.PureComponent {
   render() {
-    const { name, types, id, onPress } = this.props as Pokemon & {
+    const { name, types, id, onPress, sprites } = this.props as Pokemon & {
       onPress: () => void;
     };
 
@@ -23,7 +23,7 @@ class Card extends React.PureComponent {
           <PokemonTypeList types={types} />
           <Image
             source={{
-              uri: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
+              uri: sprites.front_default,
             }}
             style={styles.picture}
           />

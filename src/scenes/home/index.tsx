@@ -1,31 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { api } from '../../api/api';
-
 import Card from '../../components/Card';
-import { Pokemon } from '../../types/Pokemon';
 import Loading from '../../components/Loading';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  pokemonsActions,
+  pokemonsSelector,
+} from '../../reducers/pokemonReducer';
 
 export default function Home() {
-  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
+  const dispatch = useDispatch<any>();
+  const { list, loading } = useSelector(pokemonsSelector);
   const [offset, setOffset] = useState(0);
   const limit = 20;
-  const [loading, setLoading] = useState(false);
 
-  const fetchData = async () => {
-    setLoading(true);
-    const { results } = await api.getAll(offset, limit);
-    const payloadPokemons: Pokemon[] = await Promise.all(
-      results.map(async (pokemon: Pokemon) => {
-        const { id, types, abilities, species } = await api.getDetails(
-          pokemon.url
-        );
-        return { name: pokemon.name, id, types, abilities, species };
-      })
-    );
-    setPokemons(pokemons.concat(payloadPokemons));
-    setLoading(false);
+  const fetchData = () => {
+    dispatch(pokemonsActions.getAll({ offset, limit }));
   };
 
   useEffect(() => {
@@ -36,7 +27,7 @@ export default function Home() {
     setOffset(offset + limit);
   };
 
-  if (loading && pokemons.length === 0) {
+  if (loading && list.length === 0) {
     return <Loading />;
   }
 
@@ -48,14 +39,15 @@ export default function Home() {
         <Text style={styles.title}>Pokedex</Text>
       </View>
       <FlatList
-        data={pokemons}
+        data={list}
         numColumns={2}
         renderItem={({ item }) => (
           <Card
-            key={item.id}
+            key={`${item.id}-${item.name}`}
             id={item.id}
             name={item.name}
             types={item.types}
+            sprites={item.sprites}
             onPress={() => navigation.navigate('Detail', item)}
           />
         )}

@@ -16,7 +16,7 @@ const PokemonTypeList = ({ types, horizontal }: PokemonTypeProps) => {
           key={type.name}
           style={[
             styles.textContainer,
-            { backgroundColor: `${colors[type.name]}` },
+            { backgroundColor: `${colors[type?.name]}` },
           ]}
         >
           <Text style={styles.typeTitle}>{type.name}</Text>

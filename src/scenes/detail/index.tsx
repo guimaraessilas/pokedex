@@ -16,7 +16,8 @@ const Detail = ({
   route: { params: Pokemon };
   navigation: { goBack: () => void };
 }) => {
-  const { name, types, id, abilities, species }: Pokemon = route.params;
+  const { name, types, id, abilities, species, sprites }: Pokemon =
+    route.params;
 
   const [pokemonDetails, setPokemonDetails] = useState<PokemonDetails>();
   const [loading, setLoading] = useState(true);
@@ -64,14 +65,19 @@ const Detail = ({
       </View>
       <Image
         source={{
-          uri: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
+          uri: sprites.front_default,
         }}
         style={styles.picture}
       />
       <View style={styles.status}>
         <View style={styles.textContainer}>
+          <Text style={styles.flavorText}>
+            {pokemonDetails?.flavor_text_entries[0].flavor_text}
+          </Text>
+        </View>
+        <View style={styles.textContainer}>
           <View style={styles.listContainer}>
-            <Text style={styles.listText}>Habilidades: </Text>
+            <Text style={styles.listText}>Abilities: </Text>
             {abilities.map(({ ability }, index) => (
               <Text key={ability.name} style={styles.listText}>
                 {` ${ability.name}`}
@@ -80,11 +86,11 @@ const Detail = ({
             ))}
           </View>
           <View style={styles.listContainer}>
-            <Text style={styles.listText}>Espécie: </Text>
+            <Text style={styles.listText}>Species: </Text>
             {pokemonDetails?.egg_groups.map((specie, index) => (
               <Text key={specie.name} style={styles.listText}>
                 {` ${specie.name}`}
-                {index !== abilities.length - 1 && ','}
+                {index !== pokemonDetails.egg_groups.length - 1 && ','}
               </Text>
             ))}
           </View>
@@ -132,16 +138,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
   },
   pokedexNumber: {
-    fontSize: 14,
+    fontSize: 24,
     color: 'white',
     fontWeight: '600',
   },
   picture: {
-    height: 200,
+    height: 250,
     width: 200,
     alignSelf: 'center',
-    marginBottom: -65,
-    zIndex: 2,
+    marginBottom: -70,
+    zIndex: 1,
   },
   status: {
     backgroundColor: 'white',
@@ -156,10 +162,14 @@ const styles = StyleSheet.create({
   },
   listText: {
     textTransform: 'capitalize',
-    fontSize: 16,
+    fontSize: 14,
   },
   listContainer: {
     flexDirection: 'row',
-    marginBottom: 10,
+    marginBottom: 4,
+  },
+  flavorText: {
+    justifyContent: 'center',
+    fontSize: 16,
   },
 });
