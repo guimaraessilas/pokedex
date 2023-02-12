@@ -10,30 +10,13 @@ import { pokemonsSelector } from '../../reducers/pokemonReducer';
 import { getColor } from '../../utils/getColors';
 import { loadStoragedPokemons } from '../../utils/loadStoragedPokemons';
 import { keys } from '../../constants/keys';
+import { catchPokemon } from '../../utils/catchPokemon';
 
 const Detail = ({ navigation }: { navigation: { goBack: () => void } }) => {
   const { selected, loading } = useSelector(pokemonsSelector);
   const [captured, setCaptured] = useState(false);
   const [textButton, setTextButton] = useState('Trow Pokeball');
   const [storagedPokemons, setStoragedPokemons] = useState<number[]>([]);
-
-  const catchPokemon = async (id: number) => {
-    try {
-      const gotcha = Math.random() >= 0.5;
-      if (gotcha) {
-        const newPokemonList = [...storagedPokemons, id];
-        setStoragedPokemons(newPokemonList);
-        await AsyncStorage.setItem(
-          keys.BILL_PC,
-          JSON.stringify(newPokemonList)
-        );
-      } else {
-        setTextButton('Wanna try again?');
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   useEffect(() => {
     loadStoragedPokemons(setStoragedPokemons);
@@ -53,7 +36,9 @@ const Detail = ({ navigation }: { navigation: { goBack: () => void } }) => {
 
   if (loading) {
     return <Loading />;
-  } else if (!!selected) {
+  } else if (!selected) {
+    return null;
+  } else {
     return (
       <View
         style={[
@@ -125,6 +110,7 @@ const Detail = ({ navigation }: { navigation: { goBack: () => void } }) => {
               <Text style={styles.listText}>{selected?.habitat.name}</Text>
             </View>
             <TouchableOpacity
+              testID="catchButton"
               style={{
                 width: '100%',
                 height: 40,
@@ -134,7 +120,14 @@ const Detail = ({ navigation }: { navigation: { goBack: () => void } }) => {
                 marginTop: 20,
               }}
               disabled={captured}
-              onPress={() => catchPokemon(selected.id)}
+              onPress={() =>
+                catchPokemon(
+                  selected.id,
+                  setStoragedPokemons,
+                  storagedPokemons,
+                  setTextButton
+                )
+              }
             >
               <Text style={{ color: 'white', fontSize: 20 }}>{textButton}</Text>
             </TouchableOpacity>
