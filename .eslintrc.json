@@ -5,5 +5,12 @@
 
   "rules": {
     "prettier/prettier": "error"
-  }
+  },
+  "testing-library/consistent-data-testid": [
+    2,
+    {
+      "testIdAttribute": ["testID"],
+      "testIdPattern": "^TestId(__[A-Z]*)?$"
+    }
+  ]
 }
