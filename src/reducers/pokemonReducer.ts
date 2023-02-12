@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { AsyncStorage } from 'react-native';
 import { api } from '../api/api';
 import { baseURL } from '../api/client';
 import { Pokemon } from '../types/Pokemon';
@@ -76,6 +75,7 @@ const initialState = {
   list: [],
   error: null,
   success: false,
+  selected: null,
 } as PokemonState;
 
 const pokemonSlice = createSlice({

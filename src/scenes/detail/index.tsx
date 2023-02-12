@@ -1,22 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import {
-  AsyncStorage,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import PokemonTypeList from '../../components/PokemonTypeList';
 import Constants from 'expo-constants';
-import { colors } from '../../constants/colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Loading from '../../components/Loading';
 import { useSelector } from 'react-redux';
-import {
-  pokemonsActions,
-  pokemonsSelector,
-} from '../../reducers/pokemonReducer';
+import { pokemonsSelector } from '../../reducers/pokemonReducer';
 import { getColor } from '../../utils/getColors';
 import { loadStoragedPokemons } from '../../utils/loadStoragedPokemons';
 import { keys } from '../../constants/keys';
